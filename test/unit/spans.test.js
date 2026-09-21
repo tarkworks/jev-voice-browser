@@ -62,6 +62,13 @@ test("text candidates: Estonian 'kirjuta otsingukasti X' (destination before pay
   assert.ok(extractTextCandidates("kirjuta otsingukasti tere maailm").includes("tere maailm"));
 });
 
+// LEADING_DEST_RE can over-strip a word that reads as a destination noun but is actually payload
+// ("reale" = "to the field", but here "Real Madrid" is what's being typed); keep the un-stripped
+// tail as a fallback candidate too, same pattern as TRAILING_DEST_RE's fallback.
+test("text candidates: LEADING_DEST_RE over-strip keeps the un-stripped tail as a fallback", () => {
+  assert.ok(extractTextCandidates("enter reale madrid").includes("reale madrid"));
+});
+
 // Estonian: destination noun can also trail with no preposition ("... otsingukasti").
 test("text candidates: Estonian 'kirjuta X otsingukasti' (destination after payload)", () => {
   assert.ok(extractTextCandidates("kirjuta tere maailm otsingukasti").includes("tere maailm"));
@@ -85,4 +92,8 @@ test("spoken URLs: Estonian 'punkt' -> '.'", () => {
 test("candidate pick parsing: Estonian number words", () => {
   assert.equal(parseCandidatePick("teine"), 2);
   assert.equal(parseCandidatePick("see esimene"), 1);
+  // "see" is not a stopword (only "seda" is): plain English "see to"/"see for" must not resolve
+  // to a deterministic pick via the single-word homophone fallback.
+  assert.equal(parseCandidatePick("see to"), null);
+  assert.equal(parseCandidatePick("see for"), null);
 });

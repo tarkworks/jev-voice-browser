@@ -197,13 +197,14 @@ test("typed command is treated as a final utterance", async () => {
 });
 
 test("an empty final result on a new utterance id does not drop a pending command (et-EE noise events)", async () => {
-  const { c, executed } = setup({ latency: 30 });
+  const { c, executed } = setup({ latency: 80 });
   await c.start();
   c.handleTranscript({ text: "scroll down", final: true, utteranceId: "u1" });
   await sleep(10); // decideNow has started and is awaiting the mock Jev call
+  assert.equal(executed.length, 0, "precondition: u1 must still be in flight");
   // Chrome's et-EE recognizer emits an empty final result with a fresh utterance id here.
   c.handleTranscript({ text: "", final: true, utteranceId: "u2" });
-  await sleep(80); // let the in-flight decide() for u1 resolve and the action execute
+  await sleep(200); // let the in-flight decide() for u1 resolve and the action execute
   assert.equal(executed.length, 1);
   assert.equal(executed[0].type, "scroll_down");
   await c.close();

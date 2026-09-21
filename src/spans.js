@@ -87,12 +87,15 @@ export function extractTextCandidates(transcript) {
     .filter(Boolean)
     .sort((a, b) => a.index - b.index || b[0].length - a[0].length);
   for (const m of verbMatches) {
-    let tail = t.slice(m.index + m[0].length);
-    tail = tail.replace(LEADING_SITE_RE, "");
-    tail = tail.replace(LEADING_DEST_RE, "");
+    const afterSite = t.slice(m.index + m[0].length).replace(LEADING_SITE_RE, "");
+    const tail = afterSite.replace(LEADING_DEST_RE, "");
     const stripped = tail.replace(TRAILING_DEST_RE, "");
     pushUnique(out, stripped);
     if (stripped !== tail) pushUnique(out, tail);
+    // LEADING_DEST_RE can over-strip a destination word that was actually part of the payload
+    // ("enter reale madrid" — "reale" also reads as a destination noun): keep the un-stripped
+    // tail as a fallback candidate too.
+    if (tail !== afterSite) pushUnique(out, afterSite);
   }
 
   // 3. the tail after the first "for"
@@ -101,7 +104,14 @@ export function extractTextCandidates(transcript) {
 
   // 4. tail after the first word (covers "type hello")
   const firstSpace = t.indexOf(" ");
-  if (firstSpace > 0) pushUnique(out, t.slice(firstSpace + 1).replace(LEADING_DEST_RE, "").replace(TRAILING_DEST_RE, ""));
+  if (firstSpace > 0) {
+    const afterFirstWord = t.slice(firstSpace + 1);
+    const afterDest = afterFirstWord.replace(LEADING_DEST_RE, "");
+    const stripped4 = afterDest.replace(TRAILING_DEST_RE, "");
+    pushUnique(out, stripped4);
+    if (stripped4 !== afterDest) pushUnique(out, afterDest);
+    if (afterDest !== afterFirstWord) pushUnique(out, afterFirstWord);
+  }
 
   // 5. whole transcript as a last resort
   pushUnique(out, t);
@@ -167,8 +177,9 @@ const NUMBER_HOMOPHONES = { won: 1, to: 2, too: 2, for: 4 };
  */
 const PICK_STOPWORDS = new Set([
   "the", "number", "option", "pick", "choose", "select", "click", "take", "that", "please", "link", "item", "result", "go", "with", "on", "yes", "this", "um", "uh",
-  // Estonian
-  "see", "seda", "number", "variant", "vali", "kliki", "klõpsa", "võta", "link", "tulemus", "jah", "palun",
+  // Estonian ("see" deliberately excluded: it made English "see to"/"see for"/"see won" resolve
+  // to a deterministic number pick via the single-word homophone fallback below — see PR review)
+  "seda", "number", "variant", "vali", "kliki", "klõpsa", "võta", "link", "tulemus", "jah", "palun",
 ]);
 
 export function parseCandidatePick(transcript, max = 5) {

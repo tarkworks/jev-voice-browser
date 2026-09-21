@@ -309,8 +309,12 @@
   function startMic() {
     if (!SR) { alert("Web Speech API not available. Use Chrome or Edge, or type commands below."); return; }
     rec = new SR();
+    const me = rec; // identifies this recognizer instance, so a stale (replaced) one's late
+                     // events are ignored — e.g. switching language does stopMic()+startMic(),
+                     // and the old recognizer's onend can otherwise fire inside the new session.
     rec.continuous = true; rec.interimResults = true; rec.lang = $("lang").value || "en-US"; rec.maxAlternatives = 1;
     rec.onresult = (ev) => {
+      if (rec !== me) return;
       // Results before ev.resultIndex are finished. Each result index is a distinct utterance.
       for (let i = ev.resultIndex; i < ev.results.length; i++) {
         const r = ev.results[i];
@@ -319,9 +323,21 @@
         send({ type: "transcript", text, final: r.isFinal, utteranceId: `u${utteranceBase}-${i}` });
       }
     };
-    rec.onerror = (e) => { $("micstate").textContent = "error: " + e.error; if (e.error === "not-allowed") stopMic(); };
-    rec.onend = () => { if (micOn) { utteranceBase += 1; try { rec.start(); } catch {} } };
-    rec.start();
+    rec.onerror = (e) => {
+      if (rec !== me) return;
+      $("micstate").textContent = "error: " + e.error;
+      if (e.error === "not-allowed") stopMic();
+    };
+    rec.onend = () => {
+      if (rec !== me) return;
+      if (micOn) { utteranceBase += 1; try { rec.start(); } catch {} }
+    };
+    try {
+      rec.start();
+    } catch (e) {
+      $("micstate").textContent = "error: " + (e.name || e.message);
+      return;
+    }
     micOn = true; $("micdot").classList.add("on"); $("micstate").textContent = "listening"; $("micbtn").textContent = "Stop mic"; $("micbtn").classList.remove("primary");
   }
   function stopMic() {

@@ -5,7 +5,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { Controller } from "../../src/controller.js";
-import { DEBOUNCE_MS } from "../../src/constants.js";
+import { DEBOUNCE_MS, SILENCE_COMPLETE_MS } from "../../src/constants.js";
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -193,5 +193,64 @@ test("typed command is treated as a final utterance", async () => {
   c.handleCommand("go back");
   await sleep(150);
   assert.equal(executed.length, 1);
+  await c.close();
+});
+
+test("an empty final result on a new utterance id does not drop a pending command (et-EE noise events)", async () => {
+  const { c, executed } = setup({ latency: 30 });
+  await c.start();
+  c.handleTranscript({ text: "scroll down", final: true, utteranceId: "u1" });
+  await sleep(10); // decideNow has started and is awaiting the mock Jev call
+  // Chrome's et-EE recognizer emits an empty final result with a fresh utterance id here.
+  c.handleTranscript({ text: "", final: true, utteranceId: "u2" });
+  await sleep(80); // let the in-flight decide() for u1 resolve and the action execute
+  assert.equal(executed.length, 1);
+  assert.equal(executed[0].type, "scroll_down");
+  await c.close();
+});
+
+test("a 'wait' with no retry hint stops retrying once the silence window has passed (no infinite Jev loop)", async () => {
+  const browser = fakeBrowser();
+  const executed = [];
+  let calls = 0;
+  // Always answers with a confident navigate_url but no site/domain, so policy.buildAction
+  // returns { decision: "wait", summary: "where to?" } with no retryInMs — the case that used to
+  // retry every ~50ms forever once already past SILENCE_COMPLETE_MS of silence.
+  const decideFn = async () => {
+    calls += 1;
+    await sleep(10);
+    const ch = (c, conf = 0.95, extra = {}) => ({ type: "choice", choice: c, confidence: conf, probabilities: { [c]: conf, ...extra } });
+    return {
+      answers: {
+        intent: ch("navigate_url", 0.95),
+        target: ch("none", 0.9),
+        site: ch("none", 0.9),
+        complete: { noul: 0.9 },
+        is_command: { noul: 0.95 },
+        destructive: { noul: 0.02 },
+        scroll_amount: { score: 1, confidence: 0.9, probabilities: {} },
+        tab_direction: ch("none"),
+      },
+      latencyMs: 10,
+      usage: { input_tokens: 1000, output_tokens: 10 },
+      costUsd: 0.000042,
+      model: "jev-1.13.0",
+      requestId: "req",
+      candidates: { text: [], url: [] },
+      state: {},
+      questionCount: 8,
+    };
+  };
+  const executeFn = async (action) => {
+    executed.push(action);
+    await sleep(10);
+    return { ok: true, detail: "ok" };
+  };
+  const c = new Controller({ browser, decideFn, executeFn });
+  await c.start();
+  c.handleTranscript({ text: "mine delfipunktee", final: true, utteranceId: "u1" });
+  await sleep(SILENCE_COMPLETE_MS + 600);
+  assert.ok(calls <= 3, `expected a bounded number of Jev calls, got ${calls}`);
+  assert.equal(executed.length, 0);
   await c.close();
 });

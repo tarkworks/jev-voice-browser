@@ -56,3 +56,33 @@ test("candidate pick parsing", () => {
   assert.equal(parseCandidatePick("go to wikipedia"), null);
   assert.equal(parseCandidatePick(""), null);
 });
+
+// Estonian: destination comes before the payload ("kirjuta otsingukasti tere maailm"), unlike English.
+test("text candidates: Estonian 'kirjuta otsingukasti X' (destination before payload)", () => {
+  assert.ok(extractTextCandidates("kirjuta otsingukasti tere maailm").includes("tere maailm"));
+});
+
+// Estonian: destination noun can also trail with no preposition ("... otsingukasti").
+test("text candidates: Estonian 'kirjuta X otsingukasti' (destination after payload)", () => {
+  assert.ok(extractTextCandidates("kirjuta tere maailm otsingukasti").includes("tere maailm"));
+});
+
+test("text candidates: Estonian 'otsi X' and inflected site names", () => {
+  assert.equal(extractTextCandidates("otsi alan turing")[0], "alan turing");
+  assert.ok(extractTextCandidates("otsi youtubest lofi muusikat").includes("lofi muusikat"));
+  assert.ok(extractTextCandidates("otsi youtubist lofi muusikat").includes("lofi muusikat"));
+});
+
+test("text candidates: Estonian filler words are stripped", () => {
+  assert.ok(extractTextCandidates("otsi palun kassid").includes("kassid"));
+});
+
+test("spoken URLs: Estonian 'punkt' -> '.'", () => {
+  assert.deepEqual(extractUrlCandidates("ava postimees punkt ee"), ["postimees.ee"]);
+  assert.deepEqual(extractUrlCandidates("mine example punkt com"), ["example.com"]);
+});
+
+test("candidate pick parsing: Estonian number words", () => {
+  assert.equal(parseCandidatePick("teine"), 2);
+  assert.equal(parseCandidatePick("see esimene"), 1);
+});

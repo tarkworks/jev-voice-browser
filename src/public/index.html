@@ -33,6 +33,7 @@
   button.primary{background:var(--accent);color:#111;border-color:var(--accent)}
   button.danger{border-color:var(--red);color:var(--red)}
   input[type=text]{flex:1;background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:8px;padding:9px 12px;font-size:14px}
+  select{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:2px 4px;font-size:12px;font-weight:600;cursor:pointer;text-transform:none;letter-spacing:0}
   .bar{display:grid;grid-template-columns:150px 1fr 46px;gap:8px;align-items:center;margin:3px 0;font-size:12.5px}
   .bar .lbl{color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .bar .lbl.win{color:var(--text);font-weight:600}
@@ -88,7 +89,10 @@
   <!-- LEFT: speech -->
   <div class="col">
     <div class="card">
-      <h2><span class="dot" id="micdot"></span> microphone <span class="r small" id="micstate">off</span></h2>
+      <h2><span class="dot" id="micdot"></span> microphone <span class="r small" id="micstate">off</span><select id="lang" title="Recognition language">
+          <option value="en-US">EN</option>
+          <option value="et-EE">ET</option>
+        </select></h2>
       <div id="transcript"><span class="interim">Say something like “go to wikipedia”…</span></div>
       <div class="row" style="margin-top:10px">
         <button class="primary" id="micbtn">Start mic</button>
@@ -291,15 +295,27 @@
   // ------------------------------------------------------------ speech
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   let rec = null, micOn = false, utteranceBase = 0;
+
+  // Recognition language, remembered per browser (defaults to English).
+  try {
+    const savedLang = localStorage.getItem("vb-lang");
+    if (savedLang) $("lang").value = savedLang;
+  } catch {}
+  $("lang").addEventListener("change", () => {
+    try { localStorage.setItem("vb-lang", $("lang").value); } catch {}
+    if (micOn) { stopMic(); startMic(); }
+  });
+
   function startMic() {
     if (!SR) { alert("Web Speech API not available. Use Chrome or Edge, or type commands below."); return; }
     rec = new SR();
-    rec.continuous = true; rec.interimResults = true; rec.lang = "en-US"; rec.maxAlternatives = 1;
+    rec.continuous = true; rec.interimResults = true; rec.lang = $("lang").value || "en-US"; rec.maxAlternatives = 1;
     rec.onresult = (ev) => {
       // Results before ev.resultIndex are finished. Each result index is a distinct utterance.
       for (let i = ev.resultIndex; i < ev.results.length; i++) {
         const r = ev.results[i];
         const text = r[0].transcript;
+        if (!text.trim()) continue;
         send({ type: "transcript", text, final: r.isFinal, utteranceId: `u${utteranceBase}-${i}` });
       }
     };

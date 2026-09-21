@@ -71,6 +71,11 @@ export class Controller extends EventEmitter {
     let clean = cleanTranscript(text);
     const now = Date.now();
 
+    // Chrome's recognizer (notably et-EE) emits empty final results after a word or on noise, each
+    // with a new utterance id. They must not replace the live utterance — that would silently drop
+    // the pending Jev answer for the command the user just spoke.
+    if (!clean && (!this.utterance || this.utterance.physicalId !== utteranceId)) return;
+
     // One action per utterance — but if the user keeps talking in the same breath
     // ("go to wikipedia ... search for alan turing"), the words after the already-executed
     // command become a fresh virtual utterance (id "<physical>+<n>"). Fewer than two new words
@@ -269,6 +274,9 @@ export class Controller extends EventEmitter {
   /** If the user stops talking, re-evaluate with silentMs so `complete` is bypassed. */
   _scheduleSilenceRetry(utt, retryInMs = null) {
     clearTimeout(this.silenceTimer);
+    // Once the silence window has already passed, the decision was made with `complete` bypassed;
+    // without new words it cannot change, and re-asking would loop at API speed (and cost).
+    if (retryInMs == null && Date.now() - utt.updatedAt >= SILENCE_COMPLETE_MS) return;
     const waitFor = retryInMs ?? Math.max(50, SILENCE_COMPLETE_MS - (Date.now() - utt.updatedAt));
     this.silenceTimer = setTimeout(() => {
       if (this.utterance === utt && !utt.actedOn) this.decideNow("silence");

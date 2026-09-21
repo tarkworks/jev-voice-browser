@@ -94,23 +94,56 @@ export const DEFAULT_SEARCH_ENGINE = "duckduckgo";
 export const INTENT_CRITERIA = {
   navigate_url: {
     what: "Open a specific website or URL by name (go to / open / visit / take me to <site>)",
-    not_for: "Searching for a topic; clicking something already on the page",
-    examples: ["go to wikipedia", "open youtube", "take me to github.com", "visit example dot com"],
+    not_for:
+      "Searching for a topic; clicking something already on the page; opening a tab, link or section that is on the current page (that is click_element)",
+    examples: [
+      "go to wikipedia",
+      "open youtube",
+      "take me to github.com",
+      "visit example dot com",
+      "mine vikipeediasse",
+      "ava youtube",
+      "mine lehele postimees punkt ee",
+    ],
   },
   search_web: {
     what: "Search for a topic or phrase (search for / look up / google / find <query>), on the web or on a named site",
     not_for: "Typing into a specific named field without searching; opening a site's homepage",
-    examples: ["search for alan turing", "look up typesafe jev", "google cheap flights", "search wikipedia for cats"],
+    examples: [
+      "search for alan turing",
+      "look up typesafe jev",
+      "google cheap flights",
+      "search wikipedia for cats",
+      "otsi alan turing",
+      "otsi youtubest lofi muusikat",
+      "guugelda odavad lennupiletid",
+    ],
   },
   click_element: {
-    what: "Click / press / open / select / choose a link, button, tab, result or item that is on the current page",
+    what:
+      "Click / press / open / select / choose a link, button, tab, result or item that is on the current page; Estonian: klõpsa / kliki / vajuta / ava <element on the page>",
     not_for: "Opening a website by name; typing text",
-    examples: ["click the first result", "click sign in", "open the second link", "press the more information link"],
+    examples: [
+      "click the first result",
+      "click sign in",
+      "open the second link",
+      "press the more information link",
+      "ava kommentaarid",
+      "klõpsa esimesel tulemusel",
+      "vajuta sisselogimise nuppu",
+      "kliki lingil new",
+    ],
   },
   type_into_field: {
     what: "Type or enter specific text into an input box, search box or text field on the page",
     not_for: "Running a search on a search engine (that is search_web); pressing enter alone",
-    examples: ["type hello world into the search box", "enter my email", "write good morning in the comment box"],
+    examples: [
+      "type hello world into the search box",
+      "enter my email",
+      "write good morning in the comment box",
+      "kirjuta otsingukasti tere maailm",
+      "sisesta oma e-post",
+    ],
   },
   select_option: {
     what: "Choose an option from a dropdown / select menu",
@@ -120,71 +153,82 @@ export const INTENT_CRITERIA = {
   press_enter: {
     what: "Press the Enter / Return key, or submit what was typed",
     not_for: "Typing text; clicking a named button",
-    examples: ["press enter", "hit enter", "submit"],
+    examples: ["press enter", "hit enter", "submit", "vajuta enterit"],
   },
   scroll_down: {
     what: "Scroll / move down the page",
     not_for: "Scrolling up; navigating",
-    examples: ["scroll down", "scroll down a bit", "go to the bottom", "page down"],
+    examples: [
+      "scroll down",
+      "scroll down a bit",
+      "go to the bottom",
+      "page down",
+      "keri alla",
+      "keri natuke alla",
+      "keri lehe lõppu",
+      "keri allapoole",
+      "allapoole",
+      "alla",
+    ],
   },
   scroll_up: {
     what: "Scroll / move up the page",
     not_for: "Scrolling down",
-    examples: ["scroll up", "back to the top", "page up"],
+    examples: ["scroll up", "back to the top", "page up", "keri üles", "keri lehe algusesse", "keri ülespoole", "ülespoole", "üles"],
   },
   go_back: {
     what: "Go back to the previous page in history (back / go back / undo that / previous page)",
     not_for: "Scrolling up; closing a tab",
-    examples: ["go back", "undo", "back", "previous page"],
+    examples: ["go back", "undo", "back", "previous page", "mine tagasi", "tagasi"],
   },
   go_forward: {
     what: "Go forward in history",
     not_for: "Scrolling down",
-    examples: ["go forward", "forward"],
+    examples: ["go forward", "forward", "mine edasi", "edasi"],
   },
   reload: {
     what: "Reload / refresh the current page",
     not_for: "Navigating elsewhere",
-    examples: ["reload", "refresh the page"],
+    examples: ["reload", "refresh the page", "laadi leht uuesti", "värskenda lehte", "värskenda"],
   },
   open_new_tab: {
     what: "Open a new empty tab",
     not_for: "Opening a website by name in the current tab",
-    examples: ["open a new tab", "new tab"],
+    examples: ["open a new tab", "new tab", "ava uus vaheleht", "uus vaheleht", "ava uus sakk"],
   },
   close_tab: {
     what: "Close the current tab",
     not_for: "Going back",
-    examples: ["close this tab", "close tab"],
+    examples: ["close this tab", "close tab", "sulge see vaheleht", "pane vaheleht kinni"],
   },
   switch_tab: {
     what: "Switch to another / the next / the previous tab",
     not_for: "Opening or closing tabs",
-    examples: ["next tab", "switch tab", "go to the other tab"],
+    examples: ["next tab", "switch tab", "go to the other tab", "järgmine vaheleht", "vaheta vahelehte"],
   },
   confirm: {
     what: "Approve a pending action the browser asked to confirm (yes / confirm / do it / go ahead)",
     not_for: "New commands",
-    examples: ["confirm", "yes do it", "go ahead"],
+    examples: ["confirm", "yes do it", "go ahead", "kinnita", "jah tee ära"],
   },
   cancel: {
     what: "Cancel / never mind / stop the pending action",
     not_for: "Going back in history",
-    examples: ["cancel", "never mind", "stop"],
+    examples: ["cancel", "never mind", "stop", "tühista", "jäta ära"],
   },
   none: {
     what: "Not a browser command, or nothing recognizable yet (fragment, chit-chat, silence, filler)",
     not_for: "Anything that clearly matches another option",
-    examples: ["um", "okay so", "what do you think", "the weather is nice"],
+    examples: ["um", "okay so", "what do you think", "the weather is nice", "noh nii", "mis sa arvad"],
   },
 };
 
 export const SITE_CRITERIA = {
-  google: "Google (google, google it)",
+  google: "Google (google, google it) (guugelda)",
   duckduckgo: "DuckDuckGo",
-  the_web: "A general web search with no site named (search the web, look it up online)",
-  youtube: "YouTube (videos)",
-  wikipedia: "Wikipedia (the encyclopedia)",
+  the_web: "A general web search with no site named (search the web, look it up online, otsi veebist, otsi internetist)",
+  youtube: "YouTube (videos) (youtube'i, youtubest)",
+  wikipedia: "Wikipedia (the encyclopedia) (also Estonian forms: vikipeedia, vikipeediasse, vikipeediast)",
   github: "GitHub (code, repositories)",
   amazon: "Amazon (shopping)",
   reddit: "Reddit",
@@ -200,7 +244,7 @@ export const QUESTIONS = {
     instructions: {
       question: "Which browser action does the user ask for in `transcript`?",
       focus:
-        "Judge the words said so far. If the sentence is unfinished, pick the action the words already commit to; if no action is recognizable pick none. `page` and `elements` describe what is currently on screen.",
+        "Judge the words said so far. If the sentence is unfinished, pick the action the words already commit to; if no action is recognizable pick none. `page` and `elements` describe what is currently on screen. `transcript` may be in English or Estonian.",
     },
     criteria: INTENT_CRITERIA,
   },
@@ -210,7 +254,7 @@ export const QUESTIONS = {
       question:
         "Which element in `elements` is the one the user refers to in `transcript` (the thing to click, type into or select)? Each line of `elements` starts with the element id (e.g. e07), then its role and visible text; the options are those ids.",
       focus:
-        "Match by the element's visible text, role and position words like first/second/top (lines are in visual order, top of page first). Pick none if the command does not refer to any element on this page, or if the referenced element is not in the list.",
+        "Match by the element's visible text, role and position words like first/second/top (lines are in visual order, top of page first). Pick none if the command does not refer to any element on this page, or if the referenced element is not in the list. The user may speak Estonian while the element text is in English: match by meaning (kommentaarid = comments, tööpakkumised = jobs, logi sisse = log in).",
     },
     // criteria are built per request from the element list + none
   },
@@ -233,11 +277,23 @@ export const QUESTIONS = {
     criteria: {
       true: {
         what: "Complete, actionable command",
-        examples: ["scroll down", "go back", "go to wikipedia", "search for alan turing", "click the first result"],
+        examples: [
+          "scroll down",
+          "go back",
+          "go to wikipedia",
+          "search for alan turing",
+          "click the first result",
+          "keri üles",
+          "mine tagasi",
+          "ava kommentaarid",
+          "otsi alan turing",
+          "keri allapoole",
+          "tagasi",
+        ],
       },
       false: {
         what: "Cut off before the required object; more words are clearly coming",
-        examples: ["go to", "search for", "click the", "type", "open the"],
+        examples: ["go to", "search for", "click the", "type", "open the", "mine", "otsi", "klõpsa", "ava"],
       },
     },
   },
@@ -249,10 +305,34 @@ export const QUESTIONS = {
       focus: "Chit-chat, narration, talking to another person, or a stray fragment is not a command.",
     },
     criteria: {
-      true: { what: "An imperative aimed at the browser", examples: ["scroll down", "go to youtube", "click sign in"] },
+      true: {
+        what: "An imperative aimed at the browser, including a one-word command (down, back, reload; Estonian: alla, allapoole, üles, tagasi, edasi, värskenda)",
+        examples: [
+          "scroll down",
+          "go to youtube",
+          "click sign in",
+          "keri üles",
+          "ava kommentaarid",
+          "ava uus vaheleht",
+          "mine vikipeediasse",
+          "keri allapoole",
+          "allapoole",
+          "edasi",
+          "värskenda",
+        ],
+      },
       false: {
         what: "Not directed at the browser",
-        examples: ["I think we should get lunch", "um so yeah", "this is the demo", "what did you say"],
+        examples: [
+          "I think we should get lunch",
+          "um so yeah",
+          "this is the demo",
+          "what did you say",
+          "ma arvan et võiks lõunale minna",
+          "noh nii jah",
+          "ma lähen alla poodi",
+          "räägime sellest edasi homme",
+        ],
       },
     },
   },
@@ -266,11 +346,19 @@ export const QUESTIONS = {
     criteria: {
       true: {
         what: "Irreversible side effect",
-        examples: ["click buy now", "delete this repository", "send the message", "post the comment", "click checkout"],
+        examples: [
+          "click buy now",
+          "delete this repository",
+          "send the message",
+          "post the comment",
+          "click checkout",
+          "vajuta osta kohe",
+          "kustuta konto",
+        ],
       },
       false: {
         what: "Reversible / read-only",
-        examples: ["scroll down", "go to wikipedia", "click the first result", "type hello in the search box"],
+        examples: ["scroll down", "go to wikipedia", "click the first result", "type hello in the search box", "keri alla", "ava kommentaarid"],
       },
     },
   },
@@ -281,9 +369,9 @@ export const QUESTIONS = {
       focus: "Only relevant when scrolling; default is one screen when nothing is specified.",
     },
     criteria: [
-      { what: "A little: a few lines (a bit, slightly, a little)" },
-      { what: "One screen / one page, or no amount specified" },
-      { what: "All the way to the end: the very top or the very bottom" },
+      { what: "A little: a few lines (a bit, slightly, a little) (natuke, veidi, pisut)" },
+      { what: "One screen / one page, or no amount specified (üks leht, ekraanitäis; also a bare direction with no amount: alla, allapoole, üles, ülespoole)" },
+      { what: "All the way to the end: the very top or the very bottom (päris lõppu, päris algusesse, lehe lõppu, lehe algusesse)" },
     ],
   },
 
@@ -292,7 +380,7 @@ export const QUESTIONS = {
       question:
         "Which option is exactly the text the user wants typed or searched, as spoken in `transcript`? Options are verbatim candidate spans.",
       focus:
-        "Choose the span that contains the payload text only, without the command words (type, search for, into the search box). Pick none if nothing should be typed.",
+        "Choose the span that contains the payload text only, without the command words (type, search for, into the search box; Estonian: otsi, leia, guugelda, kirjuta, sisesta) and without an inflected site or field name that only says where to search or type (youtubest, vikipeediast, google'ist, otsingukasti). Pick none if nothing should be typed.",
     },
   },
 
@@ -308,9 +396,9 @@ export const QUESTIONS = {
       question: "When switching tabs, which tab does `transcript` refer to?",
     },
     criteria: {
-      next: "The next tab / the other tab / switch tab with no direction",
-      previous: "The previous tab / the tab before / last tab",
-      first: "The first tab",
+      next: "The next tab / the other tab / switch tab with no direction / järgmine vaheleht",
+      previous: "The previous tab / the tab before / last tab / eelmine vaheleht",
+      first: "The first tab / esimene vaheleht",
       none: "Not about switching tabs",
     },
   },
